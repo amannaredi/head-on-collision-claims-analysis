@@ -1,75 +1,122 @@
-🔧 1. Data Cleaning and Preprocessing
-Duplicate Removal:
-Removed duplicate rows to prevent bias in training.
+# Predicting Ultimate Claim Amounts from FNOL Data 
 
-Missing Value Handling:
+This project was developed as a Junior Data Scientist case study for Hastings Direct. The objective was to build a predictive model that estimates the ultimate claim cost of head-on collision motor insurance claims using only First Notification Of Loss (FNOL) data.
 
-Categorical columns: filled with 'Unknown'.
+---
 
-Numerical columns: imputed using column mean.
+## 📌 Problem Statement
 
-Irrelevant Columns Dropped:
+Insurance companies often learn the final cost of a claim years after the incident. This delay impacts pricing and reserving decisions. By predicting the ultimate cost at the FNOL stage, insurers can price risk better and detect potential fraud early.
 
-ClaimNumber, Date, AccidentDate were removed for not adding predictive value.
+---
 
-Time Conversion:
+## 📂 Dataset
 
-Extracted hour component from Time and created a new Hour column.
+The dataset includes FNOL records of head-on collisions and final incurred values. Features include:
+- Policyholder demographics
+- Time and day of the incident
+- Location and vehicle info
+- Third-party involvement (TP_*)
+- Binary flags (e.g., WitnessPresent, PoliceReportFiled)
 
-Day Mapping:
+---
 
-Converted DayOfWeek to ordinal integers (e.g., Monday = 0).
+## 🔄 Data Preparation and Feature Engineering
 
-Categorical Encoding:
+This project involved comprehensive data preprocessing, transformation, and explainability techniques to ensure reliable claim cost prediction.
 
-Used Label Encoding for all categorical variables to prepare data for tree-based models.
+### 🧹 1. Data Cleaning and Preprocessing
 
-🧱 2. Feature Engineering
-Weekend Flag:
-Created a binary column Weekend for Saturday and Sunday crashes.
+- **Duplicate Removal:**  
+  Removed exact duplicate rows using `drop_duplicates()`.
 
-Working Hours Flag:
-Added WorkingHours column indicating whether the crash occurred between 9 AM and 5 PM.
+- **Missing Value Handling:**  
+  - Categorical fields were filled with `'Unknown'`.  
+  - Numerical columns were imputed using the mean.
 
-Third-Party Aggregation:
-Summed all TP_* columns into a single TotalTP feature and dropped the originals.
+- **Irrelevant Columns Dropped:**  
+  Removed `ClaimNumber`, `Date`, and `AccidentDate`.
 
-🔁 3. Power Transformation
-Motivation:
-The target variable Incurred had a right-skewed distribution. This non-normality can negatively affect model performance—especially for regression tasks.
+- **Time Extraction:**  
+  Created a new `Hour` column from the `Time` field to study risk periods.
 
-Transformation Used:
-Applied PowerTransformer from sklearn.preprocessing (Yeo-Johnson method by default) to normalize the distribution of Incurred.
+- **Ordinal Mapping of Days:**  
+  Converted `DayOfWeek` into integers (Monday = 0, ..., Sunday = 6).
 
-Impact:
+- **Label Encoding:**  
+  Transformed categorical variables into numeric values.
 
-Improved the model's ability to learn patterns in the data.
+### 🧱 2. Feature Engineering
 
-Reduced the effect of extreme values or heavy skew.
+- **Weekend Indicator (`Weekend`):**  
+  1 if the accident occurred on Saturday or Sunday, else 0.
 
-📊 4. SHAP Values – Model Explainability
-Purpose:
-After model training, you used SHAP (SHapley Additive exPlanations) to explain how features contributed to the model’s predictions.
+- **Third-Party Aggregation (`TotalTP`):**  
+  Summed all `TP_*` columns to capture total third-party involvement.
 
-Implementation:
+- **Dropped Original `TP_*` Columns:**  
+  Reduced dimensionality and noise after aggregation.
 
-Used shap.TreeExplainer() with the trained Random Forest Regressor.
+---
 
-Plotted summary plot and feature impact bars to interpret global model behavior.
+### 🔁 3. Power Transformation
 
-Key Insights from SHAP:
+- **Why:**  
+  The target variable `Incurred` was right-skewed.
 
-TotalTP, Location, Hour, and Weekend were among the top features influencing the final claim value.
+- **How:**  
+  Used `PowerTransformer` (Yeo-Johnson method) from `sklearn.preprocessing`.
 
-SHAP values helped validate that your engineered features were relevant and impactful.
+- **Impact:**  
+  Normalized the target, improved learning, and reduced sensitivity to outliers.
 
-Provided transparency for business stakeholders and aligned with the goal of making the model actionable in a production setting.
+---
 
-✅ Summary
-These transformations and interpretability tools:
+### 📊 4. SHAP Values – Model Explainability
 
-Improved model performance (R² ≈ 0.87).
+- **Goal:**  
+  Interpret the trained model and understand feature contributions.
 
-Reduced skew in the target variable using PowerTransformer.
+- **Method:**  
+  - Used `shap.TreeExplainer()` on Random Forest model.  
+  - Visualized global feature importance using summary and bar plots.
 
-Validated feature importance with SHAP, providing insights critical for deploying the model responsibly.
+- **Results:**  
+  Top features: `TotalTP`, `Location`, `Hour`, and `Weekend`.  
+  SHAP confirmed the model’s decisions were consistent with domain insights.
+
+---
+
+## 🧠 Model Development
+
+- Trained multiple models:
+  - Linear Regression
+  - Lasso/Ridge Regression
+  - Decision Tree
+  - XG Boost
+  - **Random Forest Regressor** (final choice)
+
+- **Model Metrics:**
+  - R² Score: ~0.87
+  - RMSE: ~1550
+
+---
+
+## 📈 Business Impact
+
+- Enables earlier estimation of future claim payouts.
+- Helps in fraud detection and reserving strategy.
+- Supports real-time FNOL triage and decision-making.
+
+---
+
+## 🛠️ Tech Stack
+
+- Python, Pandas, NumPy
+- Scikit-learn
+- SHAP
+- Matplotlib, Seaborn
+- Jupyter Notebook
+
+---
+
